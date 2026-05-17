@@ -5,9 +5,7 @@ export default function TimerBody() {
   return (
     <>
 
-      {/* ========================= */}
       {/* BODY */}
-      {/* ========================= */}
 
       <RoundedBox
         args={[4.2, 4.2, 2.2]}
@@ -22,9 +20,9 @@ export default function TimerBody() {
         />
       </RoundedBox>
 
-    {/* ========================= */}
+
+
       {/* INNER BEZEL */}
-      {/* ========================= */}
 
       <RoundedBox
         args={[3.72, 3.72, 0.08]}
@@ -38,16 +36,20 @@ export default function TimerBody() {
         />
       </RoundedBox>
 
-    {/* ========================= */}
+
+
       {/* BACK PANEL */}
-      {/* ========================= */}
 
       <mesh position={[0, 0, -1.12]}>
-        <boxGeometry args={[2.2, 2.2, 0.08]} />
+
+        <boxGeometry
+          args={[2.2, 2.2, 0.08]}
+        />
 
         <meshStandardMaterial
           color="#dcdcdc"
         />
+
       </mesh>
 
     </>

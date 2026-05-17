@@ -10,6 +10,7 @@ import Clock3D from "./Clock3D";
 export default function Scene() {
 
   return (
+
     <Canvas
       shadows
       camera={{
@@ -18,15 +19,17 @@ export default function Scene() {
       }}
     >
 
-      {/* 배경 */}
+      {/* BACKGROUND */}
+
       <color
         attach="background"
-        args={["#111111"]}
+        args={["#050505"]}
       />
 
 
 
-      {/* 조명 */}
+      {/* LIGHT */}
+
       <ambientLight intensity={1.5} />
 
       <directionalLight
@@ -37,7 +40,8 @@ export default function Scene() {
 
 
 
-      {/* 바닥 그림자 */}
+      {/* SHADOW */}
+
       <ContactShadows
         position={[0, -2.4, 0]}
         opacity={0.45}
@@ -48,12 +52,17 @@ export default function Scene() {
 
 
 
-      {/* 3D 타이머 */}
-      <Clock3D progress={0.75} />
+      {/* CLOCK */}
+
+      <Clock3D
+        progress={0.75}
+        timeLeft={1500}
+      />
 
 
 
-      {/* 환경광 */}
+      {/* ENV */}
+
       <Environment preset="studio" />
 
     </Canvas>

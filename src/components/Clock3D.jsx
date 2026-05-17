@@ -1,11 +1,9 @@
-import { RoundedBox } from "@react-three/drei";
-import {
-  useMemo,
-  useRef,
-  useState
-} from "react";
-import * as THREE from "three";
+import { useRef } from "react";
 import { useFrame } from "@react-three/fiber";
+
+import TimerBody from "./TimerBody";
+import TimerFace from "./TimerFace";
+import TimerKnob from "./TimerKnob";
 
 export default function Clock3D({
   progress = 0.75,
@@ -13,119 +11,189 @@ export default function Clock3D({
 }) {
 
   const groupRef = useRef();
-  
+
   const dragRef = useRef(false);
+
   const lastMouse = useRef([0, 0]);
+
   const velocity = useRef([0, 0]);
 
-  // 부드러운 떠있는 움직임
+
+
+  // 인트로
+  const introRef = useRef(false);
+
+  const introY = useRef(0);
+
+  const introVelocity = useRef(-0.12);
+
+
+
   useFrame((state) => {
 
     if (!groupRef.current) return;
 
 
 
-    // 떠있는 효과
-    groupRef.current.position.y =
-        Math.sin(state.clock.elapsedTime * 1.5) * 0.05;
+    // =========================
+    // INTRO DROP
+    // =========================
+
+    if (introRef.current) {
+
+      introY.current +=
+        introVelocity.current;
+
+      introVelocity.current += 0.008;
 
 
 
-    // 관성 회전
+      if (introY.current <= 0) {
+
+        introY.current = 0;
+
+        introVelocity.current *= -0.35;
+
+
+
+        if (
+          Math.abs(introVelocity.current)
+          < 0.02
+        ) {
+
+          introRef.current = false;
+
+        }
+
+      }
+
+      groupRef.current.position.y =
+        introY.current;
+
+    }
+
+
+
+    // =========================
+    // FLOATING
+    // =========================
+
+    else {
+
+      groupRef.current.position.y =
+        Math.sin(
+          state.clock.elapsedTime * 1.0
+        ) * 0.025;
+
+    }
+
+
+
+    // =========================
+    // INERTIA
+    // =========================
+
     if (!dragRef.current) {
 
-        groupRef.current.rotation.x +=
+      groupRef.current.rotation.x +=
         velocity.current[1];
 
-        groupRef.current.rotation.y +=
+      groupRef.current.rotation.y +=
         velocity.current[0];
 
 
 
-        // 감속
-        velocity.current[0] *= 0.95;
-        velocity.current[1] *= 0.95;
+      velocity.current[0] *= 0.97;
+      velocity.current[1] *= 0.97;
 
     }
 
-    });
+  });
 
-
-
-  // 빨간 영역 Shape
-  
 
 
   return (
+
     <group
-  ref={groupRef}
-  rotation={[0.08, 0.35, 0]}
+      ref={groupRef}
+      rotation={[0.08, 0.35, 0]}
 
 
 
-  onPointerDown={(e) => {
+      onPointerDown={(e) => {
 
-  dragRef.current = true;
+        dragRef.current = true;
 
-  lastMouse.current = [
-    e.clientX,
-    e.clientY
-  ];
+        lastMouse.current = [
+          e.clientX,
+          e.clientY
+        ];
 
-}}
-
-
-
-  onPointerUp={() => {
-    dragRef.current = false;
-  }}
+      }}
 
 
 
-  onPointerMove={(e) => {
+      onPointerUp={() => {
 
-  if (!dragRef.current) return;
+        dragRef.current = false;
 
-  const deltaX =
-    e.clientX - lastMouse.current[0];
-
-  const deltaY =
-    e.clientY - lastMouse.current[1];
-
-  lastMouse.current = [
-    e.clientX,
-    e.clientY
-  ];
-
-  const rotX = deltaY * 0.005;
-    const rotY = deltaX * 0.005;
-
-    groupRef.current.rotation.x += rotX;
-    groupRef.current.rotation.y += rotY;
+      }}
 
 
 
-    // 관성 저장
-    velocity.current = [
-    rotY,
-    rotX
-    ];
+      onPointerMove={(e) => {
 
-}}
->
+        if (!dragRef.current) return;
 
-      {/* ========================= */}
-      {/* TIME TEXT */}
-      {/* ========================= */}
 
-      <mesh position={[0, -3.1, 0]}>
-        <planeGeometry args={[2, 0.5]} />
 
-        <meshBasicMaterial
-          transparent
-          opacity={0}
-        />
-      </mesh>
+        const deltaX =
+          e.clientX - lastMouse.current[0];
+
+        const deltaY =
+          e.clientY - lastMouse.current[1];
+
+
+
+        lastMouse.current = [
+          e.clientX,
+          e.clientY
+        ];
+
+
+
+        const rotX =
+          deltaY * 0.004;
+
+        const rotY =
+          deltaX * 0.004;
+
+
+
+        groupRef.current.rotation.x +=
+          rotX;
+
+        groupRef.current.rotation.y +=
+          rotY;
+
+
+
+        velocity.current = [
+          rotY,
+          rotX
+        ];
+
+      }}
+    >
+
+      <TimerBody />
+
+      <TimerFace
+        progress={progress}
+        timeLeft={timeLeft}
+      />
+
+      <TimerKnob />
 
     </group>
   );
