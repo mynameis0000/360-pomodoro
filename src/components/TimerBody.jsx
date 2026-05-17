@@ -40,7 +40,7 @@ export default function TimerBody() {
 
       {/* BACK PANEL */}
 
-      <mesh position={[0, 0, -1.12]}>
+      {/* <mesh position={[0, 0, -1.12]}>
 
         <boxGeometry
           args={[2.2, 2.2, 0.08]}
@@ -50,7 +50,7 @@ export default function TimerBody() {
           color="#dcdcdc"
         />
 
-      </mesh>
+      </mesh> */}
 
     </>
   );
