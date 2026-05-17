@@ -39,7 +39,7 @@ export default function TimerFace({ progress, timeLeft }) {
           
           {isMajor && (
             <Text
-              position={[0, radius + 0.25, 0]}
+              position={[0, radius + 0.20, 1.2]}
               fontSize={0.18}
               color="#444"
               anchorX="center"
@@ -69,7 +69,7 @@ export default function TimerFace({ progress, timeLeft }) {
       </mesh>
 
       {/* 눈금 및 숫자 */}
-      <group position={[0, 0, 0]}>
+      <group position={[0, 0, 0.1]}>
         {marks}
       </group>
 

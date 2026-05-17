@@ -1,14 +1,4 @@
-/* =========================
-   FONT
-========================= */
-
 @import url('https://fonts.googleapis.com/css2?family=Bungee&display=swap');
-
-
-
-/* =========================
-   RESET
-========================= */
 
 * {
   margin: 0;
@@ -16,434 +6,118 @@
   box-sizing: border-box;
 }
 
-
-
-/* =========================
-   ROOT
-========================= */
-
-html,
-body,
-#root {
-
+body {
   width: 100%;
-
   height: 100%;
-
   overflow: hidden;
-
-
-
-  background:
-    radial-gradient(
-      circle at center,
-      #ffffff 0%,
-      #e8e8e8 100%
-    );
-
-  font-family:
-    Arial,
-    sans-serif;
+  background: radial-gradient(circle at center, #ffffff 0%, #e8e8e8 100%);
+  font-family: Arial, sans-serif;
+  -webkit-font-smoothing: antialiased; /* 폰트 깨짐 방지 */
 }
 
-
-
-/* =========================
-   APP
-========================= */
-
-.app {
-
-  position: relative;
-
-  width: 100vw;
-
-  height: 100vh;
-
-  overflow: hidden;
-}
-
-
-
-/* =========================
-   UI OVERLAY
-========================= */
-
-.ui-overlay {
-
-  position: absolute;
-
-  inset: 0;
-
-  z-index: 100;
-
-
-
-  display: flex;
-
-  justify-content: center;
-
-  align-items: flex-start;
-
-  padding-top: 10vh;
-
-
-
-  /* 기본적으로 클릭 막기 */
+/* 상단 고정 헤더 */
+.fixed-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  padding: 40px 60px;
+  z-index: 200; /* 모든 레이어보다 위 */
   pointer-events: none;
 }
 
-
-
-/* =========================
-   TEXT CONTAINER
-========================= */
-
-.text-container {
-
-  pointer-events: auto;
-
-
-
+.logo-container {
   display: flex;
-
   flex-direction: column;
-
-  align-items: center;
-
-  text-align: center;
-
-
-
-  user-select: none;
+  pointer-events: auto;
 }
-
-
-
-/* =========================
-   TITLE
-========================= */
 
 .text-small {
-
-  font-size: 1rem;
-
-  font-weight: 300;
-
+  font-size: rem;
   letter-spacing: 0.6em;
-
-  color: #777;
-
-  margin-bottom: -0.5rem;
-
-
-
-  opacity: 0;
-
-  animation:
-    titleReveal 1.2s ease forwards;
+  color: #d62828; /* 포인트 컬러 */
+  font-weight: 900;
 }
-
-
 
 .text-main {
-
-  font-family:
-    'Bungee',
-    cursive;
-
-  font-size: 6rem;
-
-  font-weight: 900;
-
+  font-family: 'Bungee', cursive;
+  font-size: 4rem;
   line-height: 1;
-
   color: #070d15;
-
   margin: 0;
-
-
-
-  opacity: 0;
-
-  animation:
-    titleReveal 1.5s ease forwards;
-
-  animation-delay: 0.2s;
 }
 
-
-
-/* =========================
-   NOTE
-========================= */
-
-.text-note {
-
-  margin-top: 1.5rem;
-
-  font-size: 0.8rem;
-
-  letter-spacing: 0.4em;
-
-  color: #888;
-
-  text-transform: uppercase;
-
-
-
-  opacity: 0;
-
-  animation:
-    noteReveal 1.5s ease forwards;
-
-  animation-delay: 1.5s;
-}
-
-
-
-/* =========================
-   INPUT
-========================= */
-
-.time-input {
-
-  margin-top: 24px;
-
-  width: 90px;
-
-  padding: 12px;
-
-
-
-  border: 1px solid #d0d0d0;
-
-  border-radius: 14px;
-
-
-
-  background:
-    rgba(255,255,255,0.7);
-
-  backdrop-filter: blur(12px);
-
-
-
-  font-size: 16px;
-
-  text-align: center;
-
-  color: #111;
-
-  outline: none;
-
-
-
-  transition: 0.25s ease;
-}
-
-
-
-.time-input:focus {
-
-  border-color: #999;
-
-  transform: scale(1.03);
-}
-
-
-
-/* =========================
-   BUTTONS
-========================= */
-
-.controls {
-
-  display: flex;
-
-  gap: 12px;
-
-  margin-top: 18px;
-}
-
-
-
-.control-button {
-
-  border: 1px solid #d5d5d5;
-
-  background:
-    rgba(255,255,255,0.65);
-
-  backdrop-filter: blur(10px);
-
-
-
-  padding: 12px 20px;
-
-  border-radius: 14px;
-
-
-
-  font-size: 13px;
-
-  letter-spacing: 0.1em;
-
-  color: #111;
-
-
-
-  cursor: pointer;
-
-  transition: 0.25s ease;
-}
-
-
-
-.control-button:hover {
-
-  transform: translateY(-2px);
-
-  background:
-    rgba(255,255,255,0.9);
-
-  box-shadow:
-    0 10px 25px rgba(0,0,0,0.08);
-}
-
-
-
-/* =========================
-   ANIMATION
-========================= */
-
-@keyframes titleReveal {
-
-  from {
-
-    opacity: 0;
-
-    transform:
-      translateY(-20px);
-  }
-
-  to {
-
-    opacity: 1;
-
-    transform:
-      translateY(0);
-  }
-}
-
-
-
-@keyframes noteReveal {
-
-  from {
-
-    opacity: 0;
-  }
-
-  to {
-
-    opacity: 1;
-  }
-}
-
-/* =========================
-   LANDING SCREEN
-========================= */
-
-.landing-screen {
-
+/* UI 레이아웃 */
+.ui-overlay {
   position: absolute;
-
   inset: 0;
-
   z-index: 100;
-
-
-
-  display: flex;
-
-  justify-content: center;
-
-  align-items: flex-start;
-
-  padding-top: 10vh;
-
-
-
-  cursor: pointer;
+  pointer-events: none;
 }
 
-
-
-/* =========================
-   BOTTOM UI
-========================= */
+.landing-screen-click {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  pointer-events: auto;
+}
 
 .bottom-ui {
-
   position: absolute;
-
-  bottom: 40px;
-
+  bottom: 8%;
   left: 50%;
-
   transform: translateX(-50%);
-
-  z-index: 120;
-
-
-
-  display: flex;
-
-  flex-direction: column;
-
-  align-items: center;
-
-  gap: 14px;
-}
-
-/* global.css 추가 및 수정 */
-
-.input-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  animation: titleReveal 0.5s ease forwards;
+  pointer-events: auto;
+  text-align: center;
 }
 
 .time-font-input {
   font-family: 'Bungee', cursive !important;
-  font-size: 5rem; /* 인트로 POMO 글자 크기와 유사하게 설정 */
+  font-size: 4.5rem;
   color: #070d15;
-  background: none;
+  background: transparent;
   border: none;
+  border-bottom: 3px solid #222;
   text-align: center;
-  width: 250px;
+  width: 200px;
   outline: none;
-  cursor: pointer;
-  margin-top: -10px;
+  margin-bottom: 20px;
 }
 
-/* 화살표 제거 (Chrome, Safari, Edge, Opera) */
+/* 화살표 제거 */
 .time-font-input::-webkit-outer-spin-button,
 .time-font-input::-webkit-inner-spin-button {
   -webkit-appearance: none;
   margin: 0;
 }
 
-.bottom-ui {
-  position: absolute;
-  bottom: 10%; /* 화면 하단 적절한 위치 */
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 120;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 20px;
+.control-button {
+  padding: 15px 40px;
+  border-radius: 50px;
+  border: 2px solid #222;
+  background: #222;
+  color: #fff;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.control-button:hover {
+  background: #fff;
+  color: #222;
+}
+
+.finish-text {
+  font-family: 'Bungee', cursive;
+  color: #d62828;
+  font-size: 2.5rem;
+  margin-bottom: 15px;
+  animation: blink 0.5s infinite alternate;
+}
+
+@keyframes blink {
+  from { opacity: 1; } to { opacity: 0.4; }
 }

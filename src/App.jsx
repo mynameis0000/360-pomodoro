@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import Scene from "./components/Scene";
 import "./styles/global.css";
 
@@ -7,26 +7,31 @@ function App() {
   const [duration, setDuration] = useState(25 * 60);
   const [timeLeft, setTimeLeft] = useState(25 * 60);
   const [isRunning, setIsRunning] = useState(false);
-  const [displayProgress, setDisplayProgress] = useState(25 / 60);
+  const [isFinished, setIsFinished] = useState(false);
+  const [displayProgress, setDisplayProgress] = useState(25 / 3600);
 
-  // 1. Enter 시작
+  const tickAudio = useRef(null);
+  const alarmAudio = useRef(null);
+
   useEffect(() => {
-    const handleKey = (e) => {
-      if (e.key === "Enter") setStarted(true);
-    };
-    window.addEventListener("keydown", handleKey);
-    return () => window.removeEventListener("keydown", handleKey);
+    tickAudio.current = new Audio("/sound/ticking.mp3");
+    tickAudio.current.loop = true;
+    tickAudio.current.volume = 0.3;
+    alarmAudio.current = new Audio("/sound/alarm.mp3");
+    alarmAudio.current.loop = true;
+    alarmAudio.current.volume = 0.7;
   }, []);
 
-  // 2. 카운트다운 (0.1초 단위)
   useEffect(() => {
     let interval;
     if (isRunning) {
+      setIsFinished(false);
       interval = setInterval(() => {
         setTimeLeft((prev) => {
-          if (prev <= 0) {
+          if (prev <= 0.1) {
             clearInterval(interval);
             setIsRunning(false);
+            setIsFinished(true);
             return 0;
           }
           return prev - 0.1;
@@ -36,54 +41,83 @@ function App() {
     return () => clearInterval(interval);
   }, [isRunning]);
 
-  // 3. 실시간 진행률 업데이트
   useEffect(() => {
-    // 60분(3600초) 기준 비율
+    if (isRunning) tickAudio.current.play().catch(() => {});
+    else tickAudio.current.pause();
+
+    if (isFinished) alarmAudio.current.play().catch(() => {});
+    else {
+      alarmAudio.current.pause();
+      alarmAudio.current.currentTime = 0;
+    }
+  }, [isRunning, isFinished]);
+
+  useEffect(() => {
     setDisplayProgress(timeLeft / 3600);
   }, [timeLeft]);
 
+  const handleReset = () => {
+    setIsRunning(false);
+    setIsFinished(false);
+    setTimeLeft(duration);
+  };
+
   return (
-    <div className="app" style={{ width: "100vw", height: "100vh", position: "relative" }}>
-      {/* Scene 컴포넌트에 필요한 값이 전달되는지 확인 */}
-      <Scene progress={displayProgress} timeLeft={timeLeft} />
-
-      {!started && (
-        <div className="landing-screen" onClick={() => setStarted(true)} style={{ zIndex: 10 }}>
-          <div className="text-container">
-            <span className="text-small">THE</span>
-            <h1 className="text-main">POMO</h1>
-            <p className="text-note">CLICK OR ENTER TO START</p>
-          </div>
+    <div className="app">
+      {/* 고정 헤더: started와 무관하게 항상 상단에 존재 */}
+      <header className="fixed-header">
+        <div className="logo-container">
+          <span className="text-small">THE</span>
+          <h1 className="text-main">POMO</h1>
         </div>
-      )}
+      </header>
 
-      {started && (
-        <div className="bottom-ui" style={{ zIndex: 10 }}>
-          {!isRunning && (
-            <div className="input-container">
-              <span className="text-small">SET TIME</span>
-              <input
-                className="time-font-input"
-                type="number"
-                min="0"
-                max="60"
-                defaultValue={25}
-                onChange={(e) => {
-                  const mins = Number(e.target.value);
-                  setDuration(mins * 60);
-                  setTimeLeft(mins * 60);
-                  setDisplayProgress(mins / 60);
-                }}
-              />
-            </div>
-          )}
-          <div className="controls">
-            <button className="control-button" onClick={() => isRunning ? (setIsRunning(false), setTimeLeft(duration)) : setIsRunning(true)}>
-              {isRunning ? "RESET" : "START"}
-            </button>
+      {/* 3D 레이어 */}
+      <div className="scene-container">
+        <Scene progress={displayProgress} timeLeft={timeLeft} isFinished={isFinished} />
+      </div>
+
+      {/* UI 오버레이 */}
+      <div className="ui-overlay">
+        {!started ? (
+          <div className="landing-screen-click" onClick={() => setStarted(true)}>
+            <p className="text-note">CLICK TO START</p>
           </div>
-        </div>
-      )}
+        ) : (
+          <div className="bottom-ui">
+            {isFinished ? (
+              <div className="finish-ui">
+                <h2 className="finish-text">TIME'S UP!</h2>
+                <button className="control-button reset" onClick={handleReset}>STOP & RESET</button>
+              </div>
+            ) : (
+              <div className="input-container">
+                {!isRunning && (
+                  <>
+                    <span className="input-label">SET TIME</span>
+                    <input
+                      className="time-font-input"
+                      type="number"
+                      defaultValue={25}
+                      onChange={(e) => {
+                        const mins = Number(e.target.value);
+                        setDuration(mins * 60);
+                        setTimeLeft(mins * 60);
+                      }}
+                    />
+                  </>
+                )}
+                <button 
+                  className="control-button" 
+                  onClick={() => isRunning ? handleReset() : setIsRunning(true)}
+                >
+                  {isRunning ? "RESET" : "START"}
+                </button>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
     </div>
   );
 }
