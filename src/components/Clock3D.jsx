@@ -65,8 +65,8 @@ export default function Clock3D({
       rotationY.current =
         THREE.MathUtils.lerp(
           rotationY.current,
-          0.35,
-          0.02
+          0.6,
+          0.16
         );
 
       // 적용
@@ -80,7 +80,7 @@ export default function Clock3D({
       groupRef.current.rotation.x =
         THREE.MathUtils.lerp(
           groupRef.current.rotation.x,
-          0.08,
+          -0.2,
           0.02
         );
 
@@ -182,9 +182,9 @@ export default function Clock3D({
         ];
 
         // 회전 감도
-        const rotX = deltaY * 0.004;
+        const rotX = deltaY * 0.009;
 
-        const rotY = deltaX * 0.004;
+        const rotY = deltaX * 0.01;
 
         // 자유 회전
         groupRef.current.rotation.x +=
