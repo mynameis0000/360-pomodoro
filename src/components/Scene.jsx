@@ -3,7 +3,10 @@ import { Canvas } from "@react-three/fiber";
 import { Environment } from "@react-three/drei";
 import Clock3D from "./Clock3D";
 
-export default function Scene() {
+export default function Scene({
+  progress,
+  timeLeft
+}) {
   return (
     <Canvas
       gl={{ antialias: true, alpha: true }}
@@ -22,7 +25,10 @@ export default function Scene() {
       <directionalLight position={[5, 8, 5]} intensity={2} />
       
       {/* 바닥 그림자는 제거하고 물체만 공중에 띄웁니다. */}
-      <Clock3D />
+      <Clock3D
+  progress={progress}
+  timeLeft={timeLeft}
+/>
       
       <Environment preset="studio" />
     </Canvas>
