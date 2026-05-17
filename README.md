@@ -15,9 +15,9 @@
 
 이 프로젝트는 반대로:
 
-```txt
+<b>
 타이머를 돌려버린다
-```
+</b>
 
 는 아이디어에서 시작되었습니다.
 
@@ -54,7 +54,6 @@
 * 하늘에서 떨어지는 인트로
 * 바운스 후 부유(Floating)
 * 무게감 있는 움직임
-* 제품 광고 스타일 motion
 
 <br>
 
@@ -62,8 +61,6 @@
 
 * 미니멀한 레이아웃
 * 고대비 무채색 톤
-* Glassmorphism 버튼
-* 미래적인 제품 쇼케이스 스타일
 
 <br>
 
@@ -110,90 +107,6 @@ src/
  └─ main.jsx
 ```
 
-<br>
-
----
-
-# 🚀 실행 방법
-
-## 1. 프로젝트 클론
-
-```bash
-git clone <repository-url>
-```
-
-<br>
-
-## 2. 폴더 이동
-
-```bash
-cd 360-pomodoro
-```
-
-<br>
-
-## 3. 패키지 설치
-
-```bash
-npm install
-```
-
-<br>
-
-## 4. 실행
-
-```bash
-npm run dev
-```
-
-<br>
-
----
-
-# 🎯 디자인 철학
-
-이 프로젝트는 단순한 생산성 앱이 아니라,
-
-```txt
-“집중을 위한 오브젝트”
-```
-
-를 목표로 합니다.
-
-핵심 키워드:
-
-* Slow Motion
-* Negative Space
-* Cinematic Interaction
-* Product Showcase
-* Focus Experience
-
-<br>
-
----
-
-# 🌌 Motion Language
-
-프로젝트의 움직임은 다음 감성에서 영감을 받았습니다.
-
-* Apple
-* Nothing
-* Teenage Engineering
-* SF 인터페이스
-* 미래적 제품 광고
-
-<br>
-
-움직임 원칙:
-
-* 과하지 않은 애니메이션
-* 천천히 감속하는 관성
-* 아주 미세한 Floating
-* 묵직한 질량감
-
-<br>
-
----
 
 # 🔮 앞으로의 계획
 
