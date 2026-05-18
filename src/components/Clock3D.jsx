@@ -48,7 +48,7 @@ export default function Clock3D({ progress = 0.75, timeLeft = 1500 }) {
   // ==========================================
   // [휴대폰] 브레이크를 늦게 밟아 휙 날아가게 처리 (0.98)
   // [PC] 초기 버전의 묵직하고 안정적인 감쇠율로 복원 (0.94)
-  const DAMPING_FACTOR = isMobile ? 0.98 : 0.94; 
+  const DAMPING_FACTOR = isMobile ? 3 : 0.94; 
 
   // ==========================================
   // 🔄 매 프레임 애니메이션 루프 (useFrame)
