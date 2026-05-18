@@ -59,7 +59,7 @@ export default function TimerFace({ progress, timeLeft }) {
   return (
     <group>
       {/* 배경 판넬 */}
-      <RoundedBox args={[3.5, 3.5, 0.15]} radius={0.32} smoothness={6} position={[0, 0, 1.00]}>
+      <RoundedBox args={[3.5, 3.5, 0.15]} radius={0.32} smoothness={2} position={[0, 0, 1.00]}>
         <meshStandardMaterial color="#ececec" roughness={0.9} />
       </RoundedBox>
 
@@ -74,7 +74,7 @@ export default function TimerFace({ progress, timeLeft }) {
       </group>
 
       {/* 유리 커버 */}
-      <RoundedBox args={[3.7, 3.7, 0.04]} radius={0.35} smoothness={6} position={[0, 0, 1.22]}>
+      <RoundedBox args={[3.7, 3.7, 0.04]} radius={0.35} smoothness={2} position={[0, 0, 1.22]}>
         <meshPhysicalMaterial transparent opacity={0.1} transmission={1} roughness={0} thickness={0.1} />
       </RoundedBox>
     </group>

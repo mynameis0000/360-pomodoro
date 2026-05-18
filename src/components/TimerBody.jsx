@@ -10,12 +10,10 @@ export default function TimerBody() {
       <RoundedBox
         args={[4.2, 4.2, 2.2]}
         radius={0.45}
-        smoothness={8}
-        castShadow
-        receiveShadow
+        smoothness={3}
       >
         <meshStandardMaterial
-          color="#f4f4f2"
+          color="#ffffff"
           roughness={0.45}
         />
       </RoundedBox>
@@ -27,7 +25,7 @@ export default function TimerBody() {
       <RoundedBox
         args={[3.72, 3.72, 0.08]}
         radius={0.38}
-        smoothness={6}
+        smoothness={2}
         position={[0, 0, 1.07]}
       >
         <meshStandardMaterial

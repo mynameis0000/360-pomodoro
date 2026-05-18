@@ -103,8 +103,8 @@ body {
     );
 
   filter:
-    blur(28px)
-    saturate(120%);
+    blur(12px)
+    saturate(110%);
 
   animation:
     hologramFlow 16s ease-in-out infinite alternate;
