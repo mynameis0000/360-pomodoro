@@ -10,39 +10,55 @@ import TimerKnob from "./TimerKnob";
 export default function Clock3D({ progress = 0.75, timeLeft = 1500 }) {
   const groupRef = useRef();
   const dragRef = useRef(false);
-  const lastMouse = useRef([0, 0]);
-  const velocity = useRef([0, 0]);
 
-  // 모바일 여부 체크
+  // 터치/마우스 시작점 및 기준 각도 스냅샷
+  const startMouse = useRef([0, 0]);
+  const startRotation = useRef([0, 0]);
+
+  // 실제 물리 회전 및 가속도 기록 데이터
+  const velocity = useRef([0, 0]);       
+  const currentRotation = useRef([0, 0]); 
+
+  // ==========================================
+  // 📱 환경 반응형 체크 (PC / 휴대폰 분리)
+  // ==========================================
   const [isMobile, setIsMobile] = useState(false);
+
   useEffect(() => {
-    const handleResize = () => setIsMobile(window.innerWidth < 768);
+    const handleResize = () => {
+      const mobile = window.innerWidth < 768;
+      if (isMobile !== mobile) {
+        setIsMobile(mobile);
+      }
+    };
     handleResize();
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
-  }, []);
+  }, [isMobile]);
 
-  // 인트로 애니메이션 관련
+  // 인트로 애니메이션 설정 변수
   const introRef = useRef(true);
   const currentY = useRef(15);
   const velocityY = useRef(0);
   const rotationY = useRef(-Math.PI);
-
-  // ==========================================
-  // 🎛 물리 상수 튜닝 (모바일 '슥' 밀기 최적화)
-  // ==========================================
   const spring = { stiffness: 0.02, damping: 0.85 };
-  
-  // 감쇠율: 1에 가까울수록 미끄러운 얼음판 위처럼 오래 돕니다.
-  // 모바일은 손가락을 뗐을 때 시원하게 밀려야 하므로 0.965로 설정 (PC는 0.92)
-  const DAMPING_FACTOR = isMobile ? 0.965 : 0.92; 
 
+  // ==========================================
+  // 🎛️ 환경별 관성 감쇠율 (DAMPING_FACTOR)
+  // ==========================================
+  // [휴대폰] 브레이크를 늦게 밟아 휙 날아가게 처리 (0.98)
+  // [PC] 초기 버전의 묵직하고 안정적인 감쇠율로 복원 (0.94)
+  const DAMPING_FACTOR = isMobile ? 0.98 : 0.94; 
+
+  // ==========================================
+  // 🔄 매 프레임 애니메이션 루프 (useFrame)
+  // ==========================================
   useFrame((state, delta) => {
     if (!groupRef.current) return;
 
     groupRef.current.rotation.order = "YXZ";
 
-    // 1. INTRO ANIMATION
+    // 1. 인트로 애니메이션
     if (introRef.current) {
       const distY = 0 - currentY.current;
       velocityY.current += distY * spring.stiffness;
@@ -56,38 +72,44 @@ export default function Clock3D({ progress = 0.75, timeLeft = 1500 }) {
 
       if (Math.abs(velocityY.current) < 0.001 && Math.abs(distY) < 0.001) {
         introRef.current = false;
+        currentRotation.current = [groupRef.current.rotation.y, groupRef.current.rotation.x];
       }
+      return; 
     }
-    // 2. FLOATING IDLE
-    else if (!dragRef.current) {
+
+    // 2. FLOATING IDLE (조작 안 할 때 공중 부유)
+    if (!dragRef.current) {
       const time = state.clock.elapsedTime;
       const floatY = Math.sin(time * 0.4) * 0.08 + 0.2;
       groupRef.current.position.y = THREE.MathUtils.damp(groupRef.current.position.y, floatY, 1.5, delta);
     }
 
-    // ==========================================
-    // 3. 관성 회전 처리 (Inertia)
-    // ==========================================
-    if (!introRef.current) {
-      // 드래그 중이 아닐 때만 관성 속도를 회전각에 누적
-      if (!dragRef.current) {
-        groupRef.current.rotation.y += velocity.current[0];
-        groupRef.current.rotation.x += velocity.current[1];
+    // 3. 관성 애니메이션 효과
+    if (!dragRef.current) {
+      currentRotation.current[0] += velocity.current[0];
+      currentRotation.current[1] += velocity.current[1];
 
-        // 속도 감쇠 (매 프레임마다 속도를 조금씩 줄임)
-        velocity.current[0] *= DAMPING_FACTOR;
-        velocity.current[1] *= DAMPING_FACTOR;
+      // 마찰력 적용
+      velocity.current[0] *= DAMPING_FACTOR;
+      velocity.current[1] *= DAMPING_FACTOR;
 
-        // 멈춘 수준으로 속도가 떨어지면 완전히 0으로 세팅해 불필요한 연산 방지
-        if (Math.abs(velocity.current[0]) < 0.0001) velocity.current[0] = 0;
-        if (Math.abs(velocity.current[1]) < 0.0001) velocity.current[1] = 0;
-      }
-
-      // 모바일 화면 세로 회전 각도 제한
-      if (isMobile) {
-        groupRef.current.rotation.x = THREE.MathUtils.clamp(groupRef.current.rotation.x, -0.35, 0.35);
-      }
+      if (Math.abs(velocity.current[0]) < 0.00005) velocity.current[0] = 0;
+      if (Math.abs(velocity.current[1]) < 0.00005) velocity.current[1] = 0;
+    } else {
+      // 드래그/터치 중 가속도 완충 처리
+      velocity.current[0] *= isMobile ? 0.85 : 0.6;
+      velocity.current[1] *= isMobile ? 0.85 : 0.6;
     }
+
+    // 휴대폰(모바일) 기기 세로(X축) 회전 각도 제한
+    if (isMobile) {
+      currentRotation.current[1] = THREE.MathUtils.clamp(currentRotation.current[1], -0.35, 0.35);
+    }
+
+    // 최종 회전값을 매시에 투영 (PC는 원래의 15 속도로 쫀득하게 추적)
+    const dampSpeed = isMobile ? 10 : 15;
+    groupRef.current.rotation.y = THREE.MathUtils.damp(groupRef.current.rotation.y, currentRotation.current[0], dampSpeed, delta);
+    groupRef.current.rotation.x = THREE.MathUtils.damp(groupRef.current.rotation.x, currentRotation.current[1], dampSpeed, delta);
   });
 
   return (
@@ -95,44 +117,75 @@ export default function Clock3D({ progress = 0.75, timeLeft = 1500 }) {
       ref={groupRef}
       onPointerDown={(e) => {
         e.stopPropagation();
+        e.target.setPointerCapture(e.pointerId);
+
         dragRef.current = true;
-        lastMouse.current = [e.clientX, e.clientY];
-        // 드래그 시작할 때 이전 관성 속도 초기화
-        velocity.current = [0, 0];
+        
+        startMouse.current = [e.clientX, e.clientY];
+        startRotation.current = [currentRotation.current[0], currentRotation.current[1]];
+        
+        velocity.current = [0, 0]; 
         document.body.style.cursor = "grabbing";
       }}
-      onPointerUp={() => {
+
+      onPointerUp={(e) => {
+        e.stopPropagation();
+        e.target.releasePointerCapture(e.pointerId);
         dragRef.current = false;
         document.body.style.cursor = "grab";
       }}
-      onPointerLeave={() => {
-        dragRef.current = false;
-        document.body.style.cursor = "grab";
+
+      onPointerLeave={(e) => {
+        if (dragRef.current) {
+          dragRef.current = false;
+          document.body.style.cursor = "grab";
+        }
       }}
+
       onPointerMove={(e) => {
-        if (!dragRef.current || introRef.current) return;
+  if (!dragRef.current || introRef.current) return;
 
-        const deltaX = e.clientX - lastMouse.current[0];
-        const deltaY = e.clientY - lastMouse.current[1];
-        lastMouse.current = [e.clientX, e.clientY];
+  // 1. 터치/마우스 시작점으로부터 움직인 총 픽셀 거리
+  const totalDeltaX = e.clientX - startMouse.current[0];
+  const totalDeltaY = e.clientY - startMouse.current[1];
 
-        // 모바일일 때 슥 밀면 확 돌아가도록 감도(Sensitivity)를 대폭 상향
-        const sensitivity = isMobile ? 0.012 : 0.007;
+  let targetY, targetX;
 
-        const rotY = deltaX * sensitivity;
-        const rotX = deltaY * sensitivity;
+  if (isMobile) {
+    // 📱 휴대폰 버전: 기존의 시원한 화면 비율 스케일 유지
+    const touchRatioX = totalDeltaX / window.innerWidth;
+    const touchRatioY = totalDeltaY / window.innerHeight;
 
-        // 드래그하는 동안 즉각 반응
-        groupRef.current.rotation.y += rotY;
-        groupRef.current.rotation.x += rotX;
+    targetY = startRotation.current[0] + touchRatioX * (Math.PI * 5.0);
+    const flipFactor = Math.cos(startRotation.current[0]);
+    targetX = startRotation.current[1] + touchRatioY * 2.5 * flipFactor;
 
-        // 중요: 모바일에서는 마지막 움직임의 가속도를 더 강하게 보존하기 위해 곱연산 적용
-        // 손가락을 떼는 순간 이 속도로 휙 날아갑니다.
-        velocity.current = [
-          isMobile ? rotY * 1.5 : rotY,
-          isMobile ? rotX * 1.5 : rotX
-        ];
-      }}
+    // 휴대폰 튕김 힘 계산 (기존 유지)
+    velocity.current = [
+      (targetY - currentRotation.current[0]) * 0.75,
+      (targetX - currentRotation.current[1]) * 0.75
+    ];
+  } else {
+    // 💻 PC 마우스 버전: [완벽 교정]
+    // 드래그 중인 최종 절대 목표 각도 계산 (0.002 수준으로 묵직하게 제어)
+    targetY = startRotation.current[0] + totalDeltaX * 0.002;
+    
+    const flipFactor = Math.cos(startRotation.current[0]);
+    targetX = startRotation.current[1] + totalDeltaY * 0.002 * flipFactor;
+
+    // [버그 수정 핵심] 간격(Gap) 분기를 쓰지 않고, 
+    // 마우스가 매 프레임 움직이는 순수 변화량에 아주 미세한 가중치만 주어 관성으로 넘깁니다.
+    // 이 공식 덕분에 마우스를 아무리 세게 휘둘러도 속도가 일정 선 위로 튀지 않습니다.
+    const pcVelocityY = (e.movementX || 0) * 0.0008;
+    const pcVelocityX = (e.movementY || 0) * 0.0008 * flipFactor;
+
+    velocity.current = [pcVelocityY, pcVelocityX];
+  }
+
+  // 실제 회전 데이터 업데이트
+  currentRotation.current[0] = targetY;
+  currentRotation.current[1] = targetX;
+}}
     >
       <TimerBody />
       <TimerFace progress={progress} timeLeft={timeLeft} />
