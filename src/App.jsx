@@ -102,9 +102,24 @@ function App() {
   };
 
   const handleTimeChange = (e) => {
-    const minutes = Number(e.target.value);
+    const rawValue = e.target.value;
 
-    if (!minutes || minutes <= 0) return;
+    // 1. 입력창이 완전히 비어있을 때는 에러를 내지 않고 기본값 혹은 최솟값 처리를 위해 리턴
+    if (rawValue === "") return;
+
+    // 2. 소수점 입력을 원천 차단하고 정수로 변환
+    let minutes = parseInt(rawValue, 10);
+
+    // 3. [유효성 검사] 60분을 초과하면 강제로 60으로 제한 (Clamp)
+    if (minutes > 60) {
+      minutes = 60;
+      e.target.value = 60; // 입력창에 보이는 숫자도 60으로 강제 업데이트
+    } 
+    // 4. 음수 혹은 0 입력 방지 (최솟값 1분으로 제어)
+    else if (minutes <= 0 || isNaN(minutes)) {
+      minutes = 1;
+      e.target.value = 1;  // 입력창에 보이는 숫자도 1로 강제 업데이트
+    }
 
     const seconds = minutes * 60;
 
@@ -183,6 +198,8 @@ function App() {
                     <input
                       className="time-font-input"
                       type="number"
+                      min="1"
+                      max="60"
                       defaultValue={DEFAULT_MINUTES}
                       onChange={handleTimeChange}
                     />
