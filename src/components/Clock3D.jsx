@@ -46,10 +46,7 @@ export default function Clock3D({ progress = 0.75, timeLeft = 1500 }) {
   // ==========================================
   // 🎛️ 환경별 관성 감쇠율 (DAMPING_FACTOR)
   // ==========================================
-  // [휴대폰] 브레이크를 늦게 밟아 휙 날아가게 처리 (0.98)
-  // [PC] 초기 버전의 묵직하고 안정적인 감쇠율로 복원 (0.94)
-  const DAMPING_FACTOR = isMobile ? 3 : 0.94; 
-
+   const DAMPING_FACTOR = isMobile ? 0.99 : 0.985;
   // ==========================================
   // 🔄 매 프레임 애니메이션 루프 (useFrame)
   // ==========================================
@@ -143,49 +140,45 @@ export default function Clock3D({ progress = 0.75, timeLeft = 1500 }) {
       }}
 
       onPointerMove={(e) => {
-  if (!dragRef.current || introRef.current) return;
+        if (!dragRef.current) return;
 
-  // 1. 터치/마우스 시작점으로부터 움직인 총 픽셀 거리
-  const totalDeltaX = e.clientX - startMouse.current[0];
-  const totalDeltaY = e.clientY - startMouse.current[1];
+        const totalDeltaX = e.clientX - startMouse.current[0];
+        const totalDeltaY = e.clientY - startMouse.current[1];
 
-  let targetY, targetX;
+        let targetY, targetX;
 
-  if (isMobile) {
-    // 📱 휴대폰 버전: 기존의 시원한 화면 비율 스케일 유지
-    const touchRatioX = totalDeltaX / window.innerWidth;
-    const touchRatioY = totalDeltaY / window.innerHeight;
+        if (isMobile) {
+          // 📱 휴대폰: 기본 배율을 Math.PI * 6.0 -> 8.0으로 상향 (조금만 밀어도 한 바퀴 반 회전)
+          const touchRatioX = totalDeltaX / window.innerWidth;
+          const touchRatioY = totalDeltaY / window.innerHeight;
 
-    targetY = startRotation.current[0] + touchRatioX * (Math.PI * 5.0);
-    const flipFactor = Math.cos(startRotation.current[0]);
-    targetX = startRotation.current[1] + touchRatioY * 2.5 * flipFactor;
+          targetY = startRotation.current[0] + touchRatioX * (Math.PI * 8.0); // 👈 숫자 업!
+          const flipFactor = Math.cos(startRotation.current[0]);
+          targetX = startRotation.current[1] + touchRatioY * 4.0 * flipFactor;   // 👈 숫자 업!
 
-    // 휴대폰 튕김 힘 계산 (기존 유지)
-    velocity.current = [
-      (targetY - currentRotation.current[0]) * 0.75,
-      (targetX - currentRotation.current[1]) * 0.75
-    ];
-  } else {
-    // 💻 PC 마우스 버전: [완벽 교정]
-    // 드래그 중인 최종 절대 목표 각도 계산 (0.002 수준으로 묵직하게 제어)
-    targetY = startRotation.current[0] + totalDeltaX * 0.002;
-    
-    const flipFactor = Math.cos(startRotation.current[0]);
-    targetX = startRotation.current[1] + totalDeltaY * 0.002 * flipFactor;
+          // 튕길 때 힘 전달률도 0.85 -> 1.2로 증폭
+          velocity.current = [
+            (targetY - currentRotation.current[0]) * 1.2,
+            (targetX - currentRotation.current[1]) * 1.2
+          ];
+        } else {
+          // 💻 PC 마우스: 정밀도를 버리고 시원하게 돌도록 배율 상향
+          // 0.0015 -> 0.006으로 4배 상향 (마우스를 조금만 움직여도 휙 돌아감)
+          targetY = startRotation.current[0] + totalDeltaX * 0.006; 
+          
+          const flipFactor = Math.cos(startRotation.current[0]);
+          targetX = startRotation.current[1] + totalDeltaY * 0.006 * flipFactor;
 
-    // [버그 수정 핵심] 간격(Gap) 분기를 쓰지 않고, 
-    // 마우스가 매 프레임 움직이는 순수 변화량에 아주 미세한 가중치만 주어 관성으로 넘깁니다.
-    // 이 공식 덕분에 마우스를 아무리 세게 휘둘러도 속도가 일정 선 위로 튀지 않습니다.
-    const pcVelocityY = (e.movementX || 0) * 0.0008;
-    const pcVelocityX = (e.movementY || 0) * 0.0008 * flipFactor;
+          // 마우스를 놓을 때 생기는 관성 가속도 제한을 풀어서 던지는 맛 추가
+          const pcVelocityY = (e.movementX || 0) * 0.0015;
+          const pcVelocityX = (e.movementY || 0) * 0.0015 * flipFactor;
 
-    velocity.current = [pcVelocityY, pcVelocityX];
-  }
+          velocity.current = [pcVelocityY, pcVelocityX];
+        }
 
-  // 실제 회전 데이터 업데이트
-  currentRotation.current[0] = targetY;
-  currentRotation.current[1] = targetX;
-}}
+        currentRotation.current[0] = targetY;
+        currentRotation.current[1] = targetX;
+      }}
     >
       <TimerBody />
       <TimerFace progress={progress} timeLeft={timeLeft} />
