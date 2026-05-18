@@ -99,6 +99,19 @@ export default function Scene({
           makeDefault
           position={[0, 0.5, 18]}
           fov={35}
+          makeDefault
+
+          position={
+            window.innerWidth < 768
+              ? [0, 0.3, 24]
+              : [0, 0.5, 18]
+          }
+
+          fov={
+            window.innerWidth < 768
+              ? 42
+              : 35
+          }
         />
 
 
